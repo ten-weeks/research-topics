@@ -82,4 +82,59 @@ The Validation data is to make sure that your application is stable and secure. 
       };
      ```
    ## ***Cookies and caching:***
+   ##### When writing a web application, using cookies is often a necessity. When using hapi, cookies are flexible, safe, and simple
+   
+   ```js
+   server.state('data', {
+    ttl: null,
+    isSecure: true,
+    isHttpOnly: true,
+    encoding: 'base64json',
+    clearInvalid: false, // remove invalid cookies
+    strictHeader: true // don't allow violations of RFC 6265
+});
+```
+   ###### and we can use cookies config in route like this:
+   
+   ```js
+   {
+    config: {
+        state: {
+            parse: true, // parse and store in request.state
+            failAction: 'error' // may also be 'ignore' or 'log'
+        }
+    }
+}
+ ```  
+ ###### then we can set cookies by in response :
+ ```js
+ reply('Hello').state('data', { firstVisit: false });
+ 
+ ```
+ 
+ #### caching
+ 
+  ##### The Cache-Control header tells the browser and any intermediate cache if a resource is cacheable and for what duration
+  
+ ###### we can set caching in hapi:
+  ```js
+  server.route({
+    path: '/hapi/{ttl?}',
+    method: 'GET',
+    handler: function (request, reply) {
+
+        const response = reply({ be: 'hapi' });
+        if (request.params.ttl) {
+            response.ttl(request.params.ttl);
+        }
+    },
+    config: {
+        cache: {
+            expiresIn: 30 * 1000,
+            privacy: 'private'
+        }
+    }
+});
+
+  ```
    ## ***Templating with helper functions:***
